@@ -1,4 +1,4 @@
-location {{ location['path'] }} {
+location {{ location.get('match_operator', '=') }} {{ location['path'] }} {
     {% if 'options' in location %}
     {% for option in location['options'] %}
     {{ option }};
