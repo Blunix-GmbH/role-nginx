@@ -1,5 +1,15 @@
 {{ ansible_managed | comment }}
 
+{% if nginx_upstreams is defined %}
+{% for upstream in nginx_upstreams %}
+upstream {{ upstream['name'] }} {
+{% for server in upstream['servers'] %}
+    server {{ server }};
+{% endfor %}
+}
+{% endfor %}
+{% endif %}
+
 server {
 	listen {{ nginx_listen | default("80") }} default_server;
 	listen {{ nginx_listen_v6 | default("[::]:80") }} default_server;
@@ -27,5 +37,6 @@ server {
 
     {% for location in nginx_locations %}
     {% include "etc/nginx/partials/location.j2" %}
+
     {% endfor %}
 }
