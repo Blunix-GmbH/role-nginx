@@ -1,9 +1,3 @@
-- name: delete the default vhost if it exists
-  file:
-    path: /etc/nginx/sites-enabled/default
-    state: absent
-  notify: reload nginx
-
 - name: deploy nginx main configuration file
   template:
     src: etc/nginx/nginx.conf.j2
@@ -18,13 +12,4 @@
   file:
     path: /etc/nginx/sites-enabled/{{ nginx_server_name }}.conf
     state: absent
-
-- name: deploy vhost configuration file
-  when: not nginx_vhost_absent
-  template:
-    src: etc/nginx/vhost.j2
-    dest: /etc/nginx/sites-enabled/{{ nginx_server_name }}.conf
-    owner: root
-    group: root
-    mode: 0644
-  notify: reload nginx
+  with_items: '{{ nginx_vhost_absent }}'
