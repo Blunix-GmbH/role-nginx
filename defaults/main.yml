@@ -1,4 +1,4 @@
 ---
 nginx_enabled: no
-nginx_vhost_absent: no
+nginx_vhost_absent: [default]
 

@@ -5,10 +5,11 @@ Installs and configures the beloved Nginx webserver.
 
 This playbook highly values the KISS methodology - Keep It Simple Stupid.
 
-- only takes care of Nginx service installation and configuration -
+- It only takes care of Nginx service installation and configuration -
   deployments would have to go in an extra play/role with a dep on this role.
-- supports only a single vhost - if you want to configure more vhosts, run this
-  role multiple times while passing the corresponding facts.
+- It ensures absence of arbitrary vhosts which are explicitly marked as absent.
+- It doesn't configure vhosts. This is left to dedicated roles which in turn
+  can simply depend on this role.
 
 Example Playbook
 ----------------
@@ -16,7 +17,8 @@ Example Playbook
     - hosts: all
       vars:
         nginx_enabled: yes
-        nginx_server_name: example.com
+        nginx_vhost_absent:
+          - default
       roles:
          - blunix.role-nginx
 
