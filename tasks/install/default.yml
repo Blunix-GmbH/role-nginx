@@ -1,7 +1,6 @@
 - name: install nginx webserver
   apt:
     pkg: nginx
-    state: installed # not latest!
+    state: installed
     update_cache: no
     install_recommends: no
-
