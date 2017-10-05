@@ -8,8 +8,10 @@
   notify: restart nginx
 
 - name: ensure vhost absence
-  when: nginx_vhost_absent
   file:
-    path: /etc/nginx/sites-enabled/{{ nginx_server_name }}.conf
+    path: /etc/nginx/sites-enabled/{{ absent_vhost_item }}
     state: absent
   with_items: '{{ nginx_vhost_absent }}'
+  loop_control:
+    loop_var: absent_vhost_item
+  notify: reload nginx
