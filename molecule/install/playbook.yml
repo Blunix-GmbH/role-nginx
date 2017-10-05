@@ -14,5 +14,7 @@
   vars:
     nginx_enabled: yes
     nginx_server_name: wwwtest
+    nginx_vhost_absent:
+      - default
   roles:
     - role: role-nginx
