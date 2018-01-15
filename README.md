@@ -1,13 +1,13 @@
 # Ansible Role Nginx
 
-Installs and configures the beloved Nginx webserver.
+Installs and configures the Nginx webserver.
 
-This playbook:
+This role:
 
-- It only takes care of Nginx service installation and configuration -
+- only takes care of Nginx service installation and configuration -
   deployments would have to go in an extra play/role with a dep on this role.
-- It ensures absence of arbitrary vhosts which are explicitly marked as absent.
-- It doesn't configure vhosts. This is left to dedicated roles which in turn
+- ensures absence of arbitrary vhosts which are explicitly marked as absent.
+- doesn't configure vhosts. This is left to dedicated roles which in turn
   can simply depend on this role.
 
 # Example Play
