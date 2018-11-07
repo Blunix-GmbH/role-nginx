@@ -1,5 +1,4 @@
----
-- name: Converge
+- name: Prepare
   hosts: all
   gather_facts: False
   tasks:
@@ -7,14 +6,3 @@
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
       become: True
       changed_when: False
-
-- name: Converge
-  hosts: all
-  become: yes
-  vars:
-    nginx_enabled: yes
-    nginx_server_name: wwwtest
-    nginx_vhost_absent:
-      - default
-  roles:
-    - role: role-nginx

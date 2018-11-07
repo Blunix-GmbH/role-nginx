@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    server_name www.beispiel.de;
+
+    access_log /var/log/nginx/www.beispiel.de-access.log;
+    error_log /var/log/nginx/www.beispiel.de-error.log;
+
+    include /etc/nginx/includes/blunix-gzip.conf;
+
+    location / {
+        return 200 $host;
+        add_header Content-Type text/plain;
+    }
+
+}
