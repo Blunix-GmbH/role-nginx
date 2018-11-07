@@ -1,0 +1,19 @@
+server {
+    listen 443 ssl http2;
+    server_name www.example.com;
+    ssl_certificate /etc/nginx/ssl/www.example.com/www.example.com.crt;
+    ssl_certificate_key /etc/nginx/ssl/www.example.com/www.example.com.key;
+    ssl_dhparam /etc/nginx/ssl/www.example.com/dh512.pem;
+
+    access_log /var/log/nginx/www.example.com-access.log;
+    error_log /var/log/nginx/www.example.com-error.log;
+
+    include /etc/nginx/includes/blunix-gzip.conf;
+    include /etc/nginx/includes/blunix-ssl.conf;
+
+    location / {
+        return 200 $host;
+        add_header Content-Type text/plain;
+    }
+
+}

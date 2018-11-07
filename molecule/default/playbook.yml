@@ -1,14 +1,87 @@
 ---
 - name: Converge
   hosts: all
-  gather_facts: False
-  tasks:
-    - name: Install python for Ansible
-      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-      become: True
-      changed_when: False
+  become: yes
+  vars:
 
-- name: Converge
-  hosts: all
+    # Setup nginx includes to "include" in your vhost files
+    # src: templates/etc/nginx/includes/{{ item }}.conf.j2
+    # dest: /etc/nginx/includes/{{ item }}.conf
+    # gzip and ssl are provided with the role and set as default, feel free to setup your own
+    nginx_includes:
+      - "blunix-gzip"
+      - "blunix-ssl"
+
+    # Path of htusers file to create
+    nginx_htpasswd_file: /etc/nginx/htpasswd
+    # Htpasswd users to remove
+    nginx_htpasswd_absent:
+      - peter
+      - john
+    # Htpasswd users to create
+    nginx_htpasswd_present:
+      - name: steve
+        pass: secret
+
+    # Vhosts to remove in /etc/nginx/sites-enabled
+    nginx_vhosts_absent:
+      - default
+
+    # Vhosts to create and enable
+    # Creates /etc/nginx/sites-available/{{ item['name'] }}.conf and links it to /etc/nginx/sites-enabled/
+    nginx_vhosts_present:
+      - template: templates/etc/nginx/sites-available/000-default.conf.j2
+        name: 000-default
+      - template: templates/etc/nginx/sites-available/www.example.com.conf.j2
+        name: www.example.com
+      - template: templates/etc/nginx/sites-available/www.beispiel.de.conf.j2
+        name: www.beispiel.de
+
+
+  # You will have to manage your ssl files before the role runs because
+  # nginx can not restart without the ssl files being present
+  pre_tasks:
+    # Run the following two tasks in your playbook before creating the ssl files!
+    - name: create directory /etc/nginx/ssl
+      file:
+        path: "/etc/nginx/ssl/{{ nginx_vhost_present['name'] }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0700
+      with_items: "{{ nginx_vhosts_present }}"
+      loop_control:
+        loop_var: nginx_vhost_present
+    # This creates a dhparam file for each of your vhosts
+    # On production, set this to 4096 (generation will then take about one hour)
+    - name: generate one dhparam per vhost
+      openssl_dhparam:
+        path: "/etc/nginx/ssl/{{ nginx_vhost_present['name'] }}/dh512.pem"
+        size: 512
+      with_items: "{{ nginx_vhosts_present }}"
+      loop_control:
+        loop_var: nginx_vhost_present
+
+    # For molecule tests a self signed certificate is created
+    - name: install python-openssl
+      apt:
+        name: python-openssl
+        state: present
+    - name: generate an openssl private key for www.example.com
+      openssl_privatekey:
+        path: /etc/nginx/ssl/www.example.com/www.example.com.key
+    - name: generate an openssl certificate signing request for www.example.com
+      openssl_csr:
+        path: /etc/nginx/ssl/www.example.com/www.example.com.csr
+        privatekey_path: /etc/nginx/ssl/www.example.com/www.example.com.key
+        common_name: "www.example.com"
+    - name: generate an openssl self signed certificate for www.example.com
+      openssl_certificate:
+        path: /etc/nginx/ssl/www.example.com/www.example.com.crt
+        privatekey_path: /etc/nginx/ssl/www.example.com/www.example.com.key
+        csr_path: /etc/nginx/ssl/www.example.com/www.example.com.csr
+        provider: selfsigned
+
+
   roles:
     - role: role-nginx

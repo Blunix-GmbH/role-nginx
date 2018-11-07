@@ -1,36 +1,26 @@
 # Ansible Role Nginx
 
-Installs and configures the Nginx webserver.
-
-This role:
-
-- only takes care of Nginx service installation and configuration -
-  deployments would have to go in an extra play/role with a dep on this role.
-- ensures absence of arbitrary vhosts which are explicitly marked as absent.
-- doesn't configure vhosts. This is left to dedicated roles which in turn
-  can simply depend on this role.
+This Ansible Role installs and configures the Webserver Nginx. Included Features:  
+- installs the nginx package
+- templates `/etc/nginx/nginx.conf`
+- sets up "include files" in `/etc/nginx/includes/`, for example `blunix-gzip.conf` or `blunix-ssl.conf`. Set up your own includes to use as defaults in multiple vhosts.
+- manage the presence of a htpasswd file and users
+- remove multiple nginx vhosts
+- template multiple nginx vhosts
 
 # Example Play
+For a documented example play please refer to `molecule/default/playbook.yml`.
 
-```yaml
-  - hosts: all
-    vars:
-      nginx_enabled: yes
-      nginx_vhost_absent:
-        - default
-    roles:
-        - blunix.role-nginx
-```
+# Supported Linux Distributions
+- Debian 9 Stretch
+- Ubuntu 16.04 Xenial
 
 # License
-
 Apache-2.0
 
 # Author Information
-
 Service and support for orchestrated hosting environments, continuous integration/deployment/delivery and various Linux
-and open-source technology stacks are available from:
-
+and open-source technology stacks are available from:  
 ```
 Blunix GmbH - Consulting for Linux Hosting 24/7
 Glogauer Straße 21

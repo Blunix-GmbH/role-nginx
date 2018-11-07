@@ -1,17 +1,96 @@
-- name: deploy nginx main configuration file
+---
+- name: setup /etc/nginx/nginx.conf
   template:
-    src: etc/nginx/nginx.conf.j2
+    src: "templates/etc/nginx/nginx.conf-{{ ansible_distribution_release }}.j2"
     dest: /etc/nginx/nginx.conf
     owner: root
     group: root
     mode: 0644
   notify: restart nginx
 
-- name: ensure vhost absence
+- name: create dir for inlcude files for vhosts
+  file:
+    state: directory
+    path: /etc/nginx/includes
+    owner: root
+    group: root
+    mode: 0750
+
+- name: setup include files for vhosts in /etc/nginx/includes/
+  template:
+    src: "templates/etc/nginx/includes/{{ nginx_include_item }}.conf.j2"
+    dest: "/etc/nginx/includes/{{ nginx_include_item }}.conf"
+    owner: root
+    group: root
+    mode: 0640
+  with_items: "{{ nginx_includes }}"
+  loop_control:
+    loop_var: nginx_include_item
+
+- name: ensure all htpasswds configured as present
+  htpasswd:
+    path: "{{ nginx_htpasswd_file }}"
+    name: "{{ htpasswd_present_item.name }}"
+    password: "{{ htpasswd_present_item.pass }}"
+    owner: root
+    group: www-data
+    mode: 0640
+  with_items: "{{ nginx_htpasswd_present }}"
+  loop_control:
+    loop_var: htpasswd_present_item
+
+- name: remove all htpasswd users configured as absent
+  htpasswd:
+    path: "{{ nginx_htpasswd_file }}"
+    name: "{{ htpasswd_absent_item }}"
+    state: absent
+  with_items: "{{ nginx_htpasswd_absent }}"
+  loop_control:
+    loop_var: htpasswd_absent_item
+
+- name: remove nginx_vhosts_absent from /etc/nginx/sites-enabled
   file:
     path: /etc/nginx/sites-enabled/{{ absent_vhost_item }}
     state: absent
-  with_items: '{{ nginx_vhost_absent }}'
+  with_items: '{{ nginx_vhosts_absent }}'
   loop_control:
     loop_var: absent_vhost_item
   notify: reload nginx
+
+- name: remove nginx_vhosts_absent from /etc/nginx/sites-available
+  file:
+    path: /etc/nginx/sites-available/{{ absent_vhost_item }}
+    state: absent
+  with_items: '{{ nginx_vhosts_absent }}'
+  loop_control:
+    loop_var: absent_vhost_item
+  notify: reload nginx
+
+- name: setup Nginx vhosts
+  template:
+    src: "{{ present_vhost_item['template'] }}"
+    dest: "/etc/nginx/sites-available/{{ present_vhost_item['name'] }}.conf"
+    owner: root
+    group: root
+    mode: 0640
+  with_items: '{{ nginx_vhosts_present }}'
+  loop_control:
+    loop_var: present_vhost_item
+  notify: reload nginx
+
+- name: enable Nginx vhosts
+  file:
+    state: link
+    src: "/etc/nginx/sites-available/{{ present_vhost_item['name'] }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ present_vhost_item['name'] }}.conf"
+    owner: root
+    group: root
+    mode: 0640
+  with_items: '{{ nginx_vhosts_present }}'
+  loop_control:
+    loop_var: present_vhost_item
+  notify: reload nginx
+
+- name: verify Nginx config
+  become: yes
+  command: nginx -t
