@@ -6,7 +6,9 @@
     owner: root
     group: root
     mode: 0644
-  notify: restart nginx
+  notify:
+    - verify Nginx config
+    - restart Nginx
 
 - name: create dir for inlcude files for vhosts
   file:
@@ -55,7 +57,9 @@
   with_items: '{{ nginx_vhosts_absent }}'
   loop_control:
     loop_var: absent_vhost_item
-  notify: reload nginx
+  notify:
+    - verify Nginx config
+    - reload Nginx
 
 - name: remove nginx_vhosts_absent from /etc/nginx/sites-available
   file:
@@ -64,7 +68,9 @@
   with_items: '{{ nginx_vhosts_absent }}'
   loop_control:
     loop_var: absent_vhost_item
-  notify: reload nginx
+  notify:
+    - verify Nginx config
+    - reload Nginx
 
 - name: setup Nginx vhosts
   template:
@@ -76,7 +82,9 @@
   with_items: '{{ nginx_vhosts_present }}'
   loop_control:
     loop_var: present_vhost_item
-  notify: reload nginx
+  notify:
+    - verify Nginx config
+    - reload Nginx
 
 - name: enable Nginx vhosts
   file:
@@ -89,8 +97,6 @@
   with_items: '{{ nginx_vhosts_present }}'
   loop_control:
     loop_var: present_vhost_item
-  notify: reload nginx
-
-- name: verify Nginx config
-  become: yes
-  command: nginx -t
+  notify:
+    - verify Nginx config
+    - reload Nginx
