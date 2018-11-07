@@ -1,4 +1,0 @@
-- src: https://github.com/blunix/role-nginx
-  name: blunix.role-nginx
-  version: 1.0.4
-  scm: git
