@@ -25,4 +25,15 @@ http {
 
 	access_log /var/log/nginx/http-access.log;
 	error_log /var/log/nginx/http-error.log;
+
+        server {
+            listen 127.0.0.1;
+            location /stub_status {
+                stub_status on;
+                access_log off;
+                allow 127.0.0.1;
+                deny all;
+            }
+        }
+
 }
