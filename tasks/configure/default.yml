@@ -1,7 +1,7 @@
 ---
 - name: setup /etc/nginx/nginx.conf
   template:
-    src: "templates/etc/nginx/nginx.conf-{{ ansible_distribution_release }}.j2"
+    src: "templates/etc/nginx/nginx.conf.j2"
     dest: /etc/nginx/nginx.conf
     owner: root
     group: root
