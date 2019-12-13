@@ -4,61 +4,68 @@ pid /run/nginx.pid;
 include /etc/nginx/modules-enabled/*.conf;
 
 events {
-	worker_connections {{ nginx_conf_worker_connections }};
-	# multi_accept on;
+    worker_connections {{ nginx_conf_worker_connections }};
 }
 
 http {
-	sendfile {{ nginx_conf_send_file }};
-	tcp_nopush {{ nginx_conf_tcp_nopush }};
-	tcp_nodelay {{ nginx_conf_tcp_nodelay }};
-	keepalive_timeout {{ nginx_conf_keepalive_timeout }};
-	types_hash_max_size {{ nginx_conf_types_hash_max_size }};
-	server_tokens {{ nginx_conf_server_tokens }};
-	server_names_hash_bucket_size {{ nginx_conf_server_names_hash_bucket_size }};
-	server_name_in_redirect {{ nginx_conf_server_name_in_redirection }};
+    sendfile {{ nginx_conf_send_file }};
+    tcp_nopush {{ nginx_conf_tcp_nopush }};
+    tcp_nodelay {{ nginx_conf_tcp_nodelay }};
+    keepalive_timeout {{ nginx_conf_keepalive_timeout }};
+    types_hash_max_size {{ nginx_conf_types_hash_max_size }};
+    server_tokens {{ nginx_conf_server_tokens }};
+    server_names_hash_bucket_size {{ nginx_conf_server_names_hash_bucket_size }};
+    server_name_in_redirect {{ nginx_conf_server_name_in_redirection }};
 
-	include /etc/nginx/mime.types;
-	default_type application/octet-stream;
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
 
-	include /etc/nginx/sites-enabled/*;
+    include /etc/nginx/sites-enabled/*;
 
-	access_log /var/log/nginx/http-access.log;
-	error_log /var/log/nginx/http-error.log;
+    access_log /var/log/nginx/http-access.log;
+    error_log /var/log/nginx/http-error.log;
 
-  server {
-      listen 127.0.0.1;
-      location /stub_status {
-          stub_status on;
-          access_log off;
-          allow 127.0.0.1;
-          deny all;
-      }
-  }
+    server {
+        listen 127.0.0.1;
+        location /stub_status {
+            stub_status on;
+            access_log off;
+            allow 127.0.0.1;
+            deny all;
+        }
+    }
 
-	{% if nginx_log_to_syslog %}
-	# log to syslog as well as to local logfile
-	access_log syslog:server=unix:/dev/log /var/log/nginx/$host-access.log buffer=32k;
-	error_log syslog:server=unix:/dev/log /var/log/nginx/$host-error.log buffer=32k;
-	{% endif %}
 
-  {% if nginx_blunix_log_format == True %}
-	# log X-Client-IP when behind haproxy
-	underscores_in_headers on;
-	proxy_set_header x_client_ip $http_x_client_ip;
+    underscores_in_headers on;
+{% for nginx_log_custom_header in nginx_log_custom_headers %}
+    proxy_set_header {{ nginx_log_custom_header }} $http_{{ nginx_log_custom_header }};
+{% endfor %}
 
-	# blunix log format
-	log_format 'host=$host addr=$remote_addr user="$remote_user" time=$time_local req="$request" stat=$status bbs=$body_bytes_sent refe="$http_referer" agnt="$http_user_agent" '
-	           'rt=$request_time cc=$sent_http_cache_control uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time" '
-	           'cip=$http_x_client_ip' port=$server_port;
+{% if nginx_blunix_log_format == True %}
+    # blunix log format
+    log_format blunix 'host="$host" addr="$remote_addr" user="$remote_user" time="$time_local" req="$request" stat="$status" bbs="$body_bytes_sent" refe="$http_referer" agnt="$http_user_agent" '
+                      'rt="$request_time" cc="$sent_http_cache_control" uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time" port="$server_port"';
 
-  {% elif nginx_custom_log_format %}
-	# log X-Client-IP when behind haproxy
-	underscores_in_headers on;
-	proxy_set_header x_client_ip $http_x_client_ip;
+{% elif nginx_custom_log_format %}
+    # custom log format
+    log_format custom {{ nginx_custom_log_format_string }};
 
-	# blunix log format
-	log_format {{ nginx_custom_log_format_string }};
-	{% endif %}
+{% endif %}
+
+{% if nginx_log_to_syslog and nginx_blunix_log_format %}
+    # log to syslog as well as to local logfile
+    access_log syslog:server=unix:/dev/log blunix;
+    access_log /var/log/nginx/$host-access.log blunix;
+    error_log syslog:server=unix:/dev/log;
+    error_log /var/log/nginx/$host-error.log;
+{% elif nginx_log_to_syslog and nginx_custom_log_format %}
+    # log to syslog as well as to local logfile
+    access_log syslog:server=unix:/dev/log custom;
+    access_log /var/log/nginx/$host-access.log custom;
+    error_log syslog:server=unix:/dev/log;
+    error_log /var/log/nginx/$host-error.log;
+{% endif %}
+
+
 
 }

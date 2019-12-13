@@ -32,6 +32,7 @@ nginx_conf_server_names_hash_bucket_size: 64
 nginx_conf_server_name_in_redirection: 'off'
 
 # customize log format - see templates/etc/nginx/nginx.conf.j2
+nginx_log_custom_headers: []
 nginx_log_to_syslog: False
 nginx_blunix_log_format: False
 nginx_custom_log_format: False
