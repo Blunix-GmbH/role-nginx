@@ -37,6 +37,5 @@ nginx_log_to_syslog: False
 nginx_blunix_log_format: False
 nginx_custom_log_format: False
 nginx_custom_log_format_string: |
-  'host=$host addr=$remote_addr user="$remote_user" time=$time_local req="$request" stat=$status bbs=$body_bytes_sent refe="$http_referer" agnt="$http_user_agent" '
-  'rt=$request_time cc=$sent_http_cache_control uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time" '
-  'cip=$http_x_client_ip' port=$server_port
+  'host="$host" addr="$remote_addr" user="$remote_user" time="$time_local" req="$request" stat="$status" bbs="$body_bytes_sent" refe="$http_referer" agnt="$http_user_agent" '
+  'rt="$request_time" cc="$sent_http_cache_control" uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time" port="$server_port"'
