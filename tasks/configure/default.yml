@@ -72,6 +72,13 @@
     - verify Nginx config
     - reload Nginx
 
+- name: set permissions for /var/log/nginx
+  file:
+    state: directory
+    path: /var/log/nginx
+    owner: www-data
+    group: adm
+
 - name: setup Nginx vhosts
   template:
     src: "{{ present_vhost_item['template'] }}"
