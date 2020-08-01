@@ -20,8 +20,6 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
-    include /etc/nginx/sites-enabled/*;
-
     access_log /var/log/nginx/http-access.log;
     error_log /var/log/nginx/http-error.log;
 
@@ -66,6 +64,6 @@ http {
     error_log /var/log/nginx/$host-error.log;
 {% endif %}
 
-
+    include /etc/nginx/sites-enabled/*;
 
 }
