@@ -1,8 +1,0 @@
-- name: install required packages
-  apt:
-    pkg:
-      - "{{ nginx_package }}"
-      - python-passlib
-    state: present
-    update_cache: no
-    install_recommends: no

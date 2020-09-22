@@ -1,14 +1,14 @@
----
-- name: verify Nginx config
-  become: yes
+- name: verify nginx config
   command: nginx -t
 
-- name: reload Nginx
-  service:
+- name: reload nginx
+  systemd:
     name: nginx
     state: reloaded
+    enabled: True
 
-- name: restart Nginx
-  service:
+- name: restart nginx
+  systemd:
     name: nginx
     state: restarted
+    enabled: True

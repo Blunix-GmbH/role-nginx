@@ -1,14 +1,18 @@
----
 # Name of the package to install for the nginx webserver
 nginx_package: nginx
 
 # Vhosts to remove from /etc/nginx/sites-enabled and -available
-nginx_vhosts_absent: ['default']
+nginx_vhosts_absent: []
+# Example:
+#- foobar -> the .conf is added by the role!
 
 # Vhosts to create
 nginx_vhosts_present: []
+# Example:
+#- name: myvhost -> the .conf is added by the role!
+#  template: templates/etc/nginx/sites-available/myvhost.conf.j2
 
-# Default includes to setup
+# Includable files to setup
 nginx_includes:
   - "blunix-gzip"
   - "blunix-ssl"
@@ -27,15 +31,34 @@ nginx_conf_tcp_nopush: 'on'
 nginx_conf_tcp_nodelay: 'on'
 nginx_conf_keepalive_timeout: 65
 nginx_conf_types_hash_max_size: 2048
-nginx_conf_server_tokens: 'off'
-nginx_conf_server_names_hash_bucket_size: 64
+nginx_conf_server_names_hash_bucket_size: 128
 nginx_conf_server_name_in_redirection: 'off'
+
+nginx_conf_server_tokens: 'off'
+
+# Modules to remove from /etc/nginx/modules-enabled/
+nginx_modules_disabled:
+  - 50-mod-http-geoip.conf
+  - 50-mod-http-image-filter.conf
+  - 50-mod-http-xslt-filter.conf
+  - 50-mod-mail.conf
+  - 50-mod-stream.conf
+  - 70-mod-stream-geoip.conf
+
+# Modules to enable (symlink from /usr/share/nginx/modules-available/)
+nginx_modules_enabled: []
+
 
 # customize log format - see templates/etc/nginx/nginx.conf.j2
 nginx_log_custom_headers: []
 nginx_log_to_syslog: False
-nginx_blunix_log_format: False
+
 nginx_custom_log_format: False
 nginx_custom_log_format_string: |
+  'host="$host" addr="$remote_addr" user="$remote_user" time="$time_local" req="$request" stat="$status" bbs="$body_bytes_sent" refe="$http_referer" agnt="$http_user_agent" '
+  'rt="$request_time" cc="$sent_http_cache_control" uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time" port="$server_port"'
+
+nginx_blunix_log_format: False
+nginx_blunix_log_format_string: |
   'host="$host" addr="$remote_addr" user="$remote_user" time="$time_local" req="$request" stat="$status" bbs="$body_bytes_sent" refe="$http_referer" agnt="$http_user_agent" '
   'rt="$request_time" cc="$sent_http_cache_control" uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time" port="$server_port"'

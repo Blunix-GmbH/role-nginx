@@ -1,16 +1,9 @@
----
 - name: Converge
   hosts: all
-  become: yes
+  become: True
+  roles:
+    - role: role-nginx
   vars:
-
-    # Setup nginx includes to "include" in your vhost files
-    # src: templates/etc/nginx/includes/{{ item }}.conf.j2
-    # dest: /etc/nginx/includes/{{ item }}.conf
-    # gzip and ssl are provided with the role and set as default, feel free to setup your own
-    nginx_includes:
-      - "blunix-gzip"
-      - "blunix-ssl"
 
     # Path of htusers file to create
     nginx_htpasswd_file: /etc/nginx/htpasswd
@@ -22,10 +15,6 @@
     nginx_htpasswd_present:
       - name: steve
         pass: secret
-
-    # Vhosts to remove in /etc/nginx/sites-enabled
-    nginx_vhosts_absent:
-      - default
 
     # Vhosts to create and enable
     # Creates /etc/nginx/sites-available/{{ item['name'] }}.conf and links it to /etc/nginx/sites-enabled/
@@ -41,6 +30,12 @@
   # You will have to manage your ssl files before the role runs because
   # nginx can not restart without the ssl files being present
   pre_tasks:
+    - name: install molecule requirements
+      apt:
+        name:
+          - python3-openssl
+          - curl
+        state: present
     # Run the following two tasks in your playbook before creating the ssl files!
     - name: create directory /etc/nginx/ssl
       file:
@@ -61,12 +56,7 @@
       with_items: "{{ nginx_vhosts_present }}"
       loop_control:
         loop_var: nginx_vhost_present
-
     # For molecule tests a self signed certificate is created
-    - name: install python-openssl
-      apt:
-        name: python-openssl
-        state: present
     - name: generate an openssl private key for www.example.com
       openssl_privatekey:
         path: /etc/nginx/ssl/www.example.com/www.example.com.key
@@ -81,7 +71,3 @@
         privatekey_path: /etc/nginx/ssl/www.example.com/www.example.com.key
         csr_path: /etc/nginx/ssl/www.example.com/www.example.com.csr
         provider: selfsigned
-
-
-  roles:
-    - role: role-nginx

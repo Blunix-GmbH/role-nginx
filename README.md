@@ -1,32 +1,26 @@
-# Ansible Role Nginx
+# blunix_role-nginx
+This Ansible role installs and configures nginx.
 
-This Ansible Role installs and configures the Webserver Nginx. Included Features:  
-- installs the nginx package
-- templates `/etc/nginx/nginx.conf`
-- sets up "include files" in `/etc/nginx/includes/`, for example `blunix-gzip.conf` or `blunix-ssl.conf`. Set up your own includes to use as defaults in multiple vhosts.
-- manage the presence of a htpasswd file and users
-- remove multiple nginx vhosts
-- template multiple nginx vhosts
+This role is part of the Blunix hosting stack. Learn how to use it at <a href="https://man.blunix.com/" target="_blank">man.blunix.com</a>.
 
-# Example Play
-For a documented example play please refer to `molecule/default/playbook.yml`.
+# Author Information
+Blunix GmbH - Consulting for Linux Hosting 24/7
 
-# Supported Linux Distributions
-- Debian 9 Stretch
-- Ubuntu 16.04 Xenial
+Blunix GmbH provides 24/7 support with Service Level Agreements for Debian Linux based hosting environments which are automated with Ansible.
+
+```
+Blunix GmbH
+Glogauer Straße 21
+10999 Berlin
+Germany
+
+Website: https://www.blunix.com
+E-Mail:  contact@blunix.com
+gpg key: https://www.blunix.com/contact-blunix-com-gpg-key
+Signal:  +49 176 123 456 78
+```
 
 # License
 Apache-2.0
 
-# Author Information
-Service and support for orchestrated hosting environments, continuous integration/deployment/delivery and various Linux
-and open-source technology stacks are available from:  
-```
-Blunix GmbH - Consulting for Linux Hosting 24/7
-Glogauer Straße 21
-10999 Berlin - Germany
-
-Web: www.blunix.org
-Email: service[at]blunix.org
-Phone: (+49) 30 / 12 08 39 90
-```
+Please refer to the LICENSE file in the root of this repository.
